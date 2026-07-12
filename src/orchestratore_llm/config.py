@@ -21,12 +21,12 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.2
 
     # Blocco 1 - microservizio analitico
-    block1_base_url: str = "http://localhost:7000"
+    block1_base_url: str = "http://localhost:8000"
     block1_api_key: str | None = None
 
     # App
     app_host: str = "0.0.0.0"
-    app_port: int = 8000
+    app_port: int = 5000
     app_log_level: str = "INFO"
 
     # Sicurezza loop tool
