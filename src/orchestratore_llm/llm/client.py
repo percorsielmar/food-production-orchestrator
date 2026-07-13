@@ -196,17 +196,27 @@ class AnthropicLLMClient(LLMClient):
 class OpenAILLMClient(LLMClient):
     """Client per le API Chat Completions di OpenAI."""
 
-    API_URL = "https://api.openai.com/v1/chat/completions"
+    DEFAULT_API_URL = "https://api.openai.com/v1/chat/completions"
 
     def __init__(
         self, settings: Settings, http_client: httpx.AsyncClient | None = None
     ):
         super().__init__(max_tool_turns=settings.max_tool_turns)
         self.api_key = settings.openai_api_key
+        self.api_url = self._resolve_api_url(settings.llm_base_url)
         self.model = settings.llm_model
         self.max_tokens = settings.llm_max_tokens
         self.temperature = settings.llm_temperature
         self.http_client = http_client or httpx.AsyncClient(timeout=60.0)
+
+    @classmethod
+    def _resolve_api_url(cls, base_url: str | None) -> str:
+        if not base_url:
+            return cls.DEFAULT_API_URL
+        base = base_url.rstrip("/")
+        if base.endswith("/chat/completions"):
+            return base
+        return f"{base}/chat/completions"
 
     def _build_messages(
         self, messages: list[ChatMessage], system_prompt: str
@@ -268,7 +278,7 @@ class OpenAILLMClient(LLMClient):
             "content-type": "application/json",
         }
 
-        response = await self.http_client.post(self.API_URL, json=body, headers=headers)
+        response = await self.http_client.post(self.api_url, json=body, headers=headers)
         response.raise_for_status()
         data = response.json()
 
@@ -393,7 +403,9 @@ def get_llm_client(
     provider = settings.llm_provider.lower()
     if provider == "anthropic":
         return AnthropicLLMClient(settings, http_client)
-    if provider == "openai":
+    if provider in ("openai", "windsurf"):
+        # "windsurf" usa il client OpenAI-compatibile puntato su llm_base_url
+        # (gateway Windsurf/SWE che espone /v1/chat/completions).
         return OpenAILLMClient(settings, http_client)
     if provider == "mock":
         return MockLLMClient(max_tool_turns=settings.max_tool_turns)

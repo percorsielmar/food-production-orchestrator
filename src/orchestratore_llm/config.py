@@ -13,9 +13,12 @@ class Settings(BaseSettings):
     )
 
     # LLM
-    llm_provider: str = "anthropic"  # anthropic | openai | mock
+    llm_provider: str = "anthropic"  # anthropic | openai | windsurf | mock
     anthropic_api_key: str | None = None
     openai_api_key: str | None = None
+    # Endpoint OpenAI-compatibile opzionale (es. gateway Windsurf/SWE).
+    # Se valorizzato, i provider "openai" e "windsurf" lo usano al posto di api.openai.com.
+    llm_base_url: str | None = None
     llm_model: str = "claude-3-5-sonnet-20241022"
     llm_max_tokens: int = 4096
     llm_temperature: float = 0.2
