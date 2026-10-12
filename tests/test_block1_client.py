@@ -11,14 +11,11 @@ from orchestratore_llm.services.block1_client import Block1Client
 
 def _mock_handler(request: httpx.Request):
     body = json.loads(request.content)
-    assert body["cliente"] == "Carrefour"
-    response = {
-        "stockout_risk_percent": 12.5,
-        "waste_risk_percent": 3.0,
-        "expected_shortfall_units": 30.0,
-        "message": "ok",
-    }
-    return httpx.Response(200, json=response)
+    assert request.url.path == "/api/v1/predict"
+    assert body["samples"] == [[1200.0, 1000.0, 1000.0]]
+    assert body["category_map"]["Basi Pinsa"] == [0]
+    scenarios = [{"Basi Pinsa": [v]} for v in (1100.0, 1100.0, 1100.0, 900.0)]
+    return httpx.Response(200, json={"scenarios": scenarios})
 
 
 @pytest.mark.asyncio
@@ -33,6 +30,6 @@ async def test_predict_success():
         variazione_ordine_percentuale=20.0,
     )
     response = await client.predict(request)
-    assert response.stockout_risk_percent == 12.5
-    assert response.waste_risk_percent == 3.0
+    assert response.stockout_risk_percent == 75.0
+    assert response.waste_risk_percent == 25.0
     await client.close()
