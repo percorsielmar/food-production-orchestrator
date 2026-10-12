@@ -22,9 +22,10 @@ Dopo il 2026-07-13 lo sviluppo è proseguito nel monorepo `food-production-saas`
 
 ## Stato WIP
 - **Completato (prototipo)**: chat WebSocket, tool `simulate_scenario`, provider Anthropic/OpenAI/Mock, stub Blocco 1, containerizzazione.
-- **Test**: suite `tests/` → **5 passati, 1 fallito** (`tests/test_block1_client.py::test_predict_success`, `KeyError: 'cliente'`).
-  Il fallimento è preesistente: il test si aspetta il campo `cliente` nel payload inviato al Blocco 1, ma il commit
-  di integrazione del 2026-07-12 ha cambiato `PredictionRequest.to_block1_payload()` nel formato del Blocco 1 reale. Il test va aggiornato al nuovo contratto.
+- **Test**: suite `tests/` → **6/6 passati**. Nel pacchetto Docker sono stati riallineati al contratto del
+  Blocco 1 reale (`samples`/`n_scenarios`/`noise_std`/`category_map` → `scenarios`), introdotto dal commit di
+  integrazione del 2026-07-12, sia lo stub `dev/block1_stub.py` (prima rispondeva 422 e la chat mostrava rischi `N/A`)
+  sia il test `tests/test_block1_client.py::test_predict_success` (si aspettava ancora il vecchio campo `cliente`).
 - **Non presente in questo repo** (evoluto nel monorepo): RBAC, Financial Intelligence, integrazioni meteo/ERP, frontend.
 
 ## Nota sulla stima dell'effort

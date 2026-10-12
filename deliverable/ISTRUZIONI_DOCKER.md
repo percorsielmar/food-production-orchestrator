@@ -11,6 +11,7 @@ docker compose ps             # orchestratore e block1-stub "healthy"
 curl http://localhost:5000/health    # {"status":"ok"}
 ```
 Chat WebSocket: `ws://localhost:5000/ws/chat`, messaggi JSON `{"message": "..."}` → risposta `{"type":"text","content":"..."}`.
+Esempio (provider mock): `{"message": "Simulazione: cosa succede se Carrefour aumenta del 20% gli ordini di pinse?"}` → percentuali di rischio stock-out/spreco calcolate dallo stub.
 
 Arresto: `docker compose down`.
 
@@ -18,7 +19,7 @@ Arresto: `docker compose down`.
 | Servizio | Immagine | Porta | Note |
 |---|---|---|---|
 | `orchestratore` | `food-production-orchestrator:latest` (python:3.10-slim + uv) | host `${ORCHESTRATOR_PORT:-5000}` → 5000 | `uvicorn orchestratore_llm.main:app` |
-| `block1-stub` | stessa immagine | solo rete interna, 7000 | `dev/block1_stub.py`, Blocco 1 fittizio |
+| `block1-stub` | stessa immagine | solo rete interna, 7000 | `dev/block1_stub.py`, Blocco 1 fittizio con lo stesso contratto `/api/v1/train` e `/api/v1/predict` del reale |
 
 L'immagine installa le dipendenze con `uv sync --frozen --no-dev` (versioni bloccate da `uv.lock`, Python da `.python-version`).
 
@@ -47,4 +48,4 @@ uv sync --frozen && uv run pytest -q
 # oppure in container:
 docker run --rm -v "$PWD":/src -w /src ghcr.io/astral-sh/uv:python3.10-bookworm-slim sh -c "uv sync --frozen && uv run pytest -q"
 ```
-Esito attuale: 5 passati, 1 fallito preesistente (vedi `TIMELINE_E_WIP.md`).
+Esito attuale: 6/6 passati.
